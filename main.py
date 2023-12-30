@@ -94,7 +94,7 @@ if opt == 'El Pais - Actualidad':
             print(Fore.RED + "[Headline]", Fore.WHITE + f": {articles[0][i]}")
             print(Fore.RED + "[URL]", Fore.WHITE + f": {articles[1][i]}")
             print(Fore.RED + "[Date]", Fore.WHITE + f": {articles[2][i]}\n\n")
-        flag = input("\nRefresh? (Y/n): ")
+        flag = input("\nRefresh? (y/n): ")
 
         if flag == "y":
             pass
