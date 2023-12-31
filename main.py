@@ -7,6 +7,7 @@ from colorama import Fore
 import subprocess
 from simple_term_menu import TerminalMenu
 import sys
+from time import sleep
 
 # VARIABLES
 
@@ -17,6 +18,12 @@ OPTIONS = ["El Pais - Actualidad", "Manual"]
 
 def starting_menu(OPTIONS):
     options = OPTIONS
+    terminal_menu = TerminalMenu(options)
+    menu_entry_index = terminal_menu.show()
+    return options[menu_entry_index]
+
+def headlines_menu(headlines):
+    options = headlines
     terminal_menu = TerminalMenu(options)
     menu_entry_index = terminal_menu.show()
     return options[menu_entry_index]
@@ -59,8 +66,42 @@ def scrape(web_page):
     full_list.append(a_list)
     full_list.append(href_list)
     full_list.append(date_list)
+    full_dict = {}
 
-    return full_list    
+    for i in range(0, len(a_list)):
+        full_dict[a_list[i]] = href_list[i]
+
+    return full_list, full_dict 
+
+def scrape2(web_page):
+    # Make a GET request to the news website
+    response = requests.get(web_page)
+
+    # Extract the HTML content from the response
+    html_content = response.text
+
+    # Create a Beautiful Soup object
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find all the <p> tags
+    p_tags = soup.find_all('p')
+
+    # Initialize an empty list to store the text from each <p> tag
+    text_list = []
+
+    # Iterate over the <p> tags and extract the text
+    for p_tag in p_tags:
+        # Remove the text from any child <a> tags using decompose() method
+        for a_tag in p_tag.find_all('a'):
+            a_tag.decompose()
+
+        # Retrieve the text and append it to the list
+        text_list.append(p_tag.get_text())
+
+    # Join the text from each <p> tag into one variable
+    all_text = ' '.join(text_list)
+
+    return all_text
 
 def logo():
     print(Fore.RED + '''
@@ -86,25 +127,29 @@ opt = starting_menu(OPTIONS)
 if opt == 'El Pais - Actualidad':
     clear()
     logo()
-    while True:
-        articles = scrape(WEB_PAGE)
-        clear()
-        logo()
-        for i in range(len(articles[0])):
-            print(i + 1)
-            print(Fore.RED + "[Headline]", Fore.WHITE + f": {articles[0][i]}")
-            print(Fore.RED + "[URL]", Fore.WHITE + f": {articles[1][i]}")
-            print(Fore.RED + "[Date]", Fore.WHITE + f": {articles[2][i]}\n\n")
-            input()
-        flag = input("\nRefresh? (y/n): ")
 
-        if flag == "y":
-            pass
-        elif flag == "n":
-            sys.exit(0)
-        else:
-            print("ERROR: Input not recognized - EXITING WITH CODE 1")
-            sys.exit(1)
+    # Populate the 2nd Menu with the articles
+
+    print(Fore.RED + "[SCRAPING THE HTML]", Fore.WHITE + ": Loading articles...")
+
+    try:
+        articles, full_dict = scrape(WEB_PAGE)
+        print(Fore.GREEN + "[SUCCEDED]", Fore.WHITE + ": Scraping complete")
+        sleep(2)
+    except:
+        print(Fore.RED + "[ERROR]", Fore.WHITE + ": Problem while scraping the web page, check connection or review the code")
+        sys.exit(1)
+    clear()
+    logo()
+
+    # Start 2nd Menu and allow the user to choose the article
+
+    rif = headlines_menu(articles[0])
+
+    full_article = scrape2(full_dict[rif])
+
+    print(full_article)
+
 
 
 if opt == 'Manual':
