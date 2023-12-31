@@ -53,8 +53,9 @@ def scrape(web_page):
         a_tags = h2_tag.find_all("a")
         for a_tag in a_tags:
             href = a_tag.get("href")
-            a_list.append(a_tag.text)
-            href_list.append(href)
+            if a_tag.text != ("Podcast" and "Vídeo" and "‘Podcast’"):  # REVIEW THIS BIT OF CODE - the menu must not accept entries that are not articles
+                a_list.append(a_tag.text)
+                href_list.append(href)
 
     headlines = soup.find_all('span', class_='c_a_t')
     for span_tag in headlines:
@@ -129,28 +130,28 @@ if opt == 'El Pais - Actualidad':
     logo()
 
     # Populate the 2nd Menu with the articles
+    while True:
+        print(Fore.RED + "[SCRAPING THE HTML]", Fore.WHITE + ": Loading articles...")
 
-    print(Fore.RED + "[SCRAPING THE HTML]", Fore.WHITE + ": Loading articles...")
+        try:
+            articles, full_dict = scrape(WEB_PAGE)
+            print(Fore.GREEN + "[SUCCEDED]", Fore.WHITE + ": Scraping complete")
+            sleep(2)
+        except:
+            print(Fore.RED + "[ERROR]", Fore.WHITE + ": Problem while scraping the web page, check connection or review the code")
+            sys.exit(1)
+        clear()
+        logo()
 
-    try:
-        articles, full_dict = scrape(WEB_PAGE)
-        print(Fore.GREEN + "[SUCCEDED]", Fore.WHITE + ": Scraping complete")
-        sleep(2)
-    except:
-        print(Fore.RED + "[ERROR]", Fore.WHITE + ": Problem while scraping the web page, check connection or review the code")
-        sys.exit(1)
-    clear()
-    logo()
+        # Start 2nd Menu and allow the user to choose the article
 
-    # Start 2nd Menu and allow the user to choose the article
+        rif = headlines_menu(articles[0])
+        full_article = scrape2(full_dict[rif])
 
-    rif = headlines_menu(articles[0])
+        print(Fore.RED + "[SPANISH]\n\n", Fore.WHITE + f"{full_article}")
 
-    full_article = scrape2(full_dict[rif])
-
-    print(full_article)
-
-
+        input()
+        clear()
 
 if opt == 'Manual':
     print('ERROR: Manual not available')
