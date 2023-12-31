@@ -39,7 +39,7 @@ def scrape(web_page):
 
     # Create a Beautiful Soup object
     soup = BeautifulSoup(html_content, 'html.parser')
-
+    
     # Find all headlines using the appropriate tag and class
     headlines = soup.find_all('h2', class_='c_t')
     for h2_tag in headlines:
